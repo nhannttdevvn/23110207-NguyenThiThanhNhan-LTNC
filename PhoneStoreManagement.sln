@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36518.9
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhoneStoreManagement.Winforms", "PhoneStoreManagement\PhoneStoreManagement.Winforms.csproj", "{3FDAC2F5-A8F0-4125-8E23-FF554955C962}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhoneStoreManagement.Data", "PhoneStoreManagement.DAL\PhoneStoreManagement.Data.csproj", "{5D332FFD-829E-4CEB-844F-C6E5C0C23A63}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhoneStoreManagement.Domain", "PhoneStoreManagement.Service\PhoneStoreManagement.Domain.csproj", "{0CCC367F-0A1B-4437-8EDD-A624E78E9E65}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhoneStoreManagement.Services", "PhoneStoreManagement.BLL\PhoneStoreManagement.Services.csproj", "{2952B404-F923-4AAF-998C-6C950D551BBD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3FDAC2F5-A8F0-4125-8E23-FF554955C962}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3FDAC2F5-A8F0-4125-8E23-FF554955C962}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3FDAC2F5-A8F0-4125-8E23-FF554955C962}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3FDAC2F5-A8F0-4125-8E23-FF554955C962}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D332FFD-829E-4CEB-844F-C6E5C0C23A63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D332FFD-829E-4CEB-844F-C6E5C0C23A63}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D332FFD-829E-4CEB-844F-C6E5C0C23A63}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D332FFD-829E-4CEB-844F-C6E5C0C23A63}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0CCC367F-0A1B-4437-8EDD-A624E78E9E65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0CCC367F-0A1B-4437-8EDD-A624E78E9E65}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0CCC367F-0A1B-4437-8EDD-A624E78E9E65}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0CCC367F-0A1B-4437-8EDD-A624E78E9E65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2952B404-F923-4AAF-998C-6C950D551BBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2952B404-F923-4AAF-998C-6C950D551BBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2952B404-F923-4AAF-998C-6C950D551BBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2952B404-F923-4AAF-998C-6C950D551BBD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {35AAD32A-3896-4A94-9EBF-70A13A0C7316}
+	EndGlobalSection
+EndGlobal
