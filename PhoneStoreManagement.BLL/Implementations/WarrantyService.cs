@@ -1,27 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using PhoneStoreManagement.Data.Repository;
+﻿using PhoneStoreManagement.Data.Repository;
 using PhoneStoreManagement.Entity.Entities;
 using PhoneStoreManagement.Services.Interfaces;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace PhoneStoreManagement.Data;
+namespace PhoneStoreManagement.Services.Implementations;
 
 public class WarrantyService : IWarrantyService
 {
-    private readonly IUnitOfWork _uow;
+    private readonly IWarrantyRepository _repo;
 
-    public WarrantyService(IUnitOfWork uow) => _uow = uow;
-
-    public Task<List<Warranty>> LookupAsync(string phoneOrWarrantyNo, CancellationToken ct = default)
-        => _uow.Warranties.LookupAsync(phoneOrWarrantyNo, ct);
-
-    public bool IsExpired(Warranty w, DateTime? now = null)
+    public WarrantyService(IWarrantyRepository repo)
     {
-        var t = (now ?? DateTime.Now).Date;
-        return t > w.EndDate.Date;
+        _repo = repo;
+    }
+
+    public async Task<List<Warranty>> SearchWarrantyAsync(string keyword)
+    {
+        return await _repo.LookupAsync(keyword);
     }
 }

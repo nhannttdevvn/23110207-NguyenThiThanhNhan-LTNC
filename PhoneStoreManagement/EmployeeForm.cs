@@ -19,9 +19,16 @@ public partial class EmployeeForm : Form
     // ================= LOAD =================
     private async void LoadData()
     {
-        ConfigGrid();
-        dgvEmployees.DataSource = await _svc.SearchAsync("");
-        ClearInput();
+        try
+        {
+            ConfigGrid();
+            dgvEmployees.DataSource = await _svc.SearchAsync("");
+            ClearInput();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("Lỗi tải dữ liệu: " + (ex.InnerException?.Message ?? ex.Message), "Lỗi");
+        }
     }
 
     private void ConfigGrid()
@@ -72,45 +79,51 @@ public partial class EmployeeForm : Form
     // ================= VALIDATE =================
     private bool ValidateInput()
     {
-        if (string.IsNullOrWhiteSpace(txtFullName.Text))
+        try
         {
-            MessageBox.Show("Họ tên không được để trống");
+            if (string.IsNullOrWhiteSpace(txtFullName.Text))
+            {
+                MessageBox.Show("Họ tên không được để trống");
+                return false;
+            }
+
+            if (!Regex.IsMatch(txtPhone.Text.Trim(), @"^0\d{9}$"))
+            {
+                MessageBox.Show("Số điện thoại không hợp lệ");
+                return false;
+            }
+
+            if (!Regex.IsMatch(txtEmail.Text.Trim(), @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+            {
+                MessageBox.Show("Email không hợp lệ");
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(txtUsername.Text))
+            {
+                MessageBox.Show("Tài khoản không được để trống");
+                return false;
+            }
+
+            if (_svc.IsEmailExists(txtEmail.Text, _selected?.EmployeeCode))
+            {
+                MessageBox.Show("Email đã tồn tại");
+                return false;
+            }
+
+            if (_svc.IsPhoneExists(txtPhone.Text, _selected?.EmployeeCode))
+            {
+                MessageBox.Show("Số điện thoại đã tồn tại");
+                return false;
+            }
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("Lỗi kiểm tra dữ liệu: " + ex.Message);
             return false;
         }
-
-        if (!Regex.IsMatch(txtPhone.Text.Trim(), @"^0\d{9}$"))
-        {
-            MessageBox.Show("Số điện thoại không hợp lệ");
-            return false;
-        }
-
-        if (!Regex.IsMatch(txtEmail.Text.Trim(), @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
-        {
-            MessageBox.Show("Email không hợp lệ");
-            return false;
-        }
-
-        if (string.IsNullOrWhiteSpace(txtUsername.Text))
-        {
-            MessageBox.Show("Tài khoản không được để trống");
-            return false;
-        }
-
-        // check trùng lặp email nhân viên
-        if (_svc.IsEmailExists(txtEmail.Text, _selected?.EmployeeCode))
-        {
-            MessageBox.Show("Email đã tồn tại");
-            return false;
-        }
-
-        if (_svc.IsPhoneExists(txtPhone.Text, _selected?.EmployeeCode))
-        {
-            MessageBox.Show("Số điện thoại đã tồn tại");
-            return false;
-        }
-     
-
-        return true;
     }
 
     // ================= ADD =================
@@ -132,6 +145,7 @@ public partial class EmployeeForm : Form
             };
 
             await _svc.CreateAsync(u, "123456");
+            MessageBox.Show("Thêm nhân viên thành công");
             LoadData();
         }
         catch (Exception ex)
@@ -143,7 +157,11 @@ public partial class EmployeeForm : Form
     // ================= UPDATE =================
     private async void btnUpdate_Click(object sender, EventArgs e)
     {
-        if (_selected == null) return;
+        if (_selected == null)
+        {
+            MessageBox.Show("Vui lòng chọn nhân viên cần cập nhật");
+            return;
+        }
         if (!ValidateInput()) return;
 
         try
@@ -155,6 +173,7 @@ public partial class EmployeeForm : Form
             _selected.Username = txtUsername.Text.Trim();
 
             await _svc.UpdateAsync(_selected);
+            MessageBox.Show("Cập nhật thành công");
             LoadData();
         }
         catch (Exception ex)
@@ -166,15 +185,20 @@ public partial class EmployeeForm : Form
     // ================= DELETE =================
     private async void btnDelete_Click(object sender, EventArgs e)
     {
-        if (_selected == null) return;
+        if (_selected == null)
+        {
+            MessageBox.Show("Vui lòng chọn nhân viên cần xóa");
+            return;
+        }
 
-        if (MessageBox.Show("Xóa nhân viên?", "Xác nhận",
-            MessageBoxButtons.YesNo) != DialogResult.Yes)
+        if (MessageBox.Show("Xác nhận xóa nhân viên này?", "Xác nhận",
+            MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
             return;
 
         try
         {
             await _svc.DeleteAsync(_selected.AppUserId);
+            MessageBox.Show("Xóa thành công");
             LoadData();
         }
         catch (Exception ex)
@@ -186,27 +210,48 @@ public partial class EmployeeForm : Form
     // ================= SEARCH =================
     private async void btnSearch_Click(object sender, EventArgs e)
     {
-        dgvEmployees.DataSource = await _svc.SearchAsync(txtSearch.Text.Trim());
+        try
+        {
+            dgvEmployees.DataSource = await _svc.SearchAsync(txtSearch.Text.Trim());
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("Lỗi tìm kiếm: " + ex.Message);
+        }
     }
 
     private async void txtSearch_TextChanged(object sender, EventArgs e)
     {
-        dgvEmployees.DataSource = await _svc.SearchAsync(txtSearch.Text.Trim());
+        try
+        {
+            dgvEmployees.DataSource = await _svc.SearchAsync(txtSearch.Text.Trim());
+        }
+        catch
+        {
+            // Thường bỏ qua lỗi ở sự kiện TextChanged để tránh hiện popup liên tục
+        }
     }
 
     // ================= GRID CLICK =================
     private void dgvEmployees_CellClick(object sender, DataGridViewCellEventArgs e)
     {
-        if (e.RowIndex < 0) return;
+        try
+        {
+            if (e.RowIndex < 0) return;
 
-        _selected = dgvEmployees.Rows[e.RowIndex].DataBoundItem as AppUser;
-        if (_selected == null) return;
+            _selected = dgvEmployees.Rows[e.RowIndex].DataBoundItem as AppUser;
+            if (_selected == null) return;
 
-        txtEmployeeCode.Text = _selected.EmployeeCode;
-        txtFullName.Text = _selected.FullName;
-        txtPhone.Text = _selected.Phone;
-        txtEmail.Text = _selected.Email;
-        txtHomeTown.Text = _selected.HomeTown;
-        txtUsername.Text = _selected.Username;
+            txtEmployeeCode.Text = _selected.EmployeeCode;
+            txtFullName.Text = _selected.FullName;
+            txtPhone.Text = _selected.Phone;
+            txtEmail.Text = _selected.Email;
+            txtHomeTown.Text = _selected.HomeTown;
+            txtUsername.Text = _selected.Username;
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("Lỗi chọn dòng: " + ex.Message);
+        }
     }
 }

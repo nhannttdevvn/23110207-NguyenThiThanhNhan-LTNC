@@ -22,23 +22,37 @@ namespace PhoneStoreManagement.Winforms
 
         private async void InvoiceDetailForm_Load(object sender, EventArgs e)
         {
-            var invoice = await _reportService.GetInvoiceDetailAsync(_invoiceId);
-
-            lblInvoiceId.Text = invoice.InvoiceId.ToString();
-            lblCustomer.Text = invoice.Customer.FullName;
-            lblPhone.Text = invoice.Customer.Phone;
-            lblAddress.Text = invoice.Customer.Address;
-            lblDate.Text = invoice.InvoiceDate.ToString("dd/MM/yyyy HH:mm");
-            lblEmployee.Text = invoice.Employee.EmployeeCode;
-            lblTotal.Text = invoice.TotalAmount.ToString("N0");
-
-            dgvItems.DataSource = invoice.InvoiceItems.Select(x => new
+            try
             {
-                ProductName = x.Product.ProductName,
-                x.Quantity,
-                x.UnitPrice,
-                x.LineTotal
-            }).ToList();
+                var invoice = await _reportService.GetInvoiceDetailAsync(_invoiceId);
+
+                if (invoice == null)
+                {
+                    MessageBox.Show("Không tìm thấy thông tin hóa đơn", "Thông báo");
+                    this.Close();
+                    return;
+                }
+
+                lblInvoiceId.Text = invoice.InvoiceId.ToString();
+                lblCustomer.Text = invoice.Customer?.FullName ?? "N/A";
+                lblPhone.Text = invoice.Customer?.Phone ?? "N/A";
+                lblAddress.Text = invoice.Customer?.Address ?? "N/A";
+                lblDate.Text = invoice.InvoiceDate.ToString("dd/MM/yyyy HH:mm");
+                lblEmployee.Text = invoice.Employee?.EmployeeCode ?? "N/A";
+                lblTotal.Text = invoice.TotalAmount.ToString("N0");
+
+                dgvItems.DataSource = invoice.InvoiceItems.Select(x => new
+                {
+                    ProductName = x.Product?.ProductName ?? "Sản phẩm đã xóa",
+                    x.Quantity,
+                    x.UnitPrice,
+                    x.LineTotal
+                }).ToList();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi khi tải chi tiết hóa đơn: " + (ex.InnerException?.Message ?? ex.Message), "Lỗi");
+            }
         }
     }
 }

@@ -12,29 +12,50 @@ namespace PhoneStoreManagement.Winforms
 
         public LoginForm(IAuthService auth)
         {
-            _auth = auth;
-            InitializeComponent();
+            try
+            {
+                _auth = auth;
+                InitializeComponent();
 
-            // Nhấn Enter = bấm nút Login
-            this.AcceptButton = btnLogin;
+                // Nhấn Enter = bấm nút Login
+                this.AcceptButton = btnLogin;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi khởi tạo form: " + ex.Message);
+            }
         }
 
         private async void btnLogin_Click(object sender, EventArgs e)
         {
-            var user = await _auth.LoginAdminAsync(
-                txtUsername.Text.Trim(),
-                txtPassword.Text
-            );
-
-            if (user == null)
+            try
             {
-                MessageBox.Show("Sai tài khoản hoặc mật khẩu");
-                return;
-            }
+                // Vô hiệu hóa nút để tránh click nhiều lần
+                btnLogin.Enabled = false;
 
-            LoggedUser = user;
-            DialogResult = DialogResult.OK;
-            Close();
+                var user = await _auth.LoginAdminAsync(
+                    txtUsername.Text.Trim(),
+                    txtPassword.Text
+                );
+
+                if (user == null)
+                {
+                    MessageBox.Show("Sai tài khoản hoặc mật khẩu", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                LoggedUser = user;
+                DialogResult = DialogResult.OK;
+                Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi đăng nhập: " + (ex.InnerException?.Message ?? ex.Message), "Lỗi Hệ Thống");
+            }
+            finally
+            {
+                btnLogin.Enabled = true;
+            }
         }
     }
 }

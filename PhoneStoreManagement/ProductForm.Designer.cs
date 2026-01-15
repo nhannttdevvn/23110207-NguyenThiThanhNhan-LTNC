@@ -8,7 +8,7 @@ partial class ProductForm
     private TextBox txtSearch, txtCode, txtName, txtSale;
     private ComboBox cboBrand, cboSupplier, cboOrigin, cboVariant;
     private NumericUpDown numWarranty;
-    private Button btnSearch, btnAdd, btnUpdate, btnDelete;
+    private Button btnSearch, btnAdd, btnUpdate, btnDelete, btnReset;
 
     private Label lblCode, lblName, lblBrand;
     private Label lblSale, lblWarranty, lblSupplier, lblOrigin, lblVariant;
@@ -39,6 +39,7 @@ partial class ProductForm
         btnAdd = new Button();
         btnUpdate = new Button();
         btnDelete = new Button();
+        btnReset = new Button();
 
         lblCode = new Label();
         lblName = new Label();
@@ -123,6 +124,10 @@ partial class ProductForm
         btnDelete.Text = "Delete";
         btnDelete.SetBounds(btnX, btnY + 84, 120, 32);
         btnDelete.Click += btnDelete_Click;
+
+        btnReset.Text = "Reset";
+        btnReset.SetBounds(btnX, btnY + 126, 120, 32);
+        btnReset.Click += btnReset_Click;
 
         Controls.AddRange(new Control[]
         {

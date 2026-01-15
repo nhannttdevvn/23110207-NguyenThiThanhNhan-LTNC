@@ -23,49 +23,74 @@ public partial class ImportWarehouseForm : Form
 
     private void LoadProducts()
     {
-        var products = _db.Products
-            .Where(p => p.Quantity >= 0)   // có trong kho
-            .AsNoTracking()
-            .ToList();
-
-        if (products.Count == 0)
+        try
         {
-            MessageBox.Show("Không có sản phẩm trong kho");
-            return;
-        }
+            var products = _db.Products
+                .Where(p => p.Quantity >= 0)   // có trong kho
+                .AsNoTracking()
+                .ToList();
 
-        cboProduct.DataSource = products;
-        cboProduct.DisplayMember = "ProductName";
-        cboProduct.ValueMember = "ProductId";
-        cboProduct.SelectedIndex = -1;
+            if (products.Count == 0)
+            {
+                MessageBox.Show("Không có sản phẩm trong kho", "Thông báo");
+                return;
+            }
+
+            cboProduct.DataSource = products;
+            cboProduct.DisplayMember = "ProductName";
+            cboProduct.ValueMember = "ProductId";
+            cboProduct.SelectedIndex = -1;
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("Lỗi tải danh sách sản phẩm: " + (ex.InnerException?.Message ?? ex.Message), "Lỗi");
+        }
     }
 
     private void cboProduct_SelectedIndexChanged(object sender, EventArgs e)
     {
-        if (cboProduct.SelectedItem is Product p)
+        try
         {
-            txtProductCode.Text = p.ProductCode;
+            if (cboProduct.SelectedItem is Product p)
+            {
+                txtProductCode.Text = p.ProductCode;
+            }
+            else
+            {
+                txtProductCode.Clear();
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("Lỗi hiển thị mã sản phẩm: " + ex.Message);
         }
     }
 
     private void btnSave_Click(object sender, EventArgs e)
     {
-        if (cboProduct.SelectedItem is not Product p)
+        try
         {
-            MessageBox.Show("Vui lòng chọn sản phẩm");
-            return;
-        }
+            if (cboProduct.SelectedItem is not Product p)
+            {
+                MessageBox.Show("Vui lòng chọn sản phẩm", "Cảnh báo");
+                return;
+            }
 
-        if (numQuantity.Value <= 0)
+            if (numQuantity.Value <= 0)
+            {
+                MessageBox.Show("Số lượng phải lớn hơn 0", "Cảnh báo");
+                return;
+            }
+
+            SelectedProduct = p;
+            ImportQuantity = (int)numQuantity.Value;
+
+            DialogResult = DialogResult.OK;
+            Close();
+        }
+        catch (Exception ex)
         {
-            MessageBox.Show("Số lượng phải lớn hơn 0");
-            return;
+            MessageBox.Show("Lỗi lưu dữ liệu nhập kho: " + ex.Message, "Lỗi");
         }
-
-        SelectedProduct = p;
-        ImportQuantity = (int)numQuantity.Value;
-
-        DialogResult = DialogResult.OK;
-        Close();
     }
 }

@@ -10,6 +10,7 @@ partial class MenuForm
     private Button btnWarehouse;
     private Button btnOrder;
     private Button btnStat;
+    private Button btnWarranty;
 
     protected override void Dispose(bool disposing)
     {
@@ -26,6 +27,7 @@ partial class MenuForm
         btnWarehouse = new Button();
         btnOrder = new Button();
         btnStat = new Button();
+        btnWarranty = new Button();
 
         btnProduct.Text = "Products";
         btnSupplier.Text = "Suppliers";
@@ -33,6 +35,7 @@ partial class MenuForm
         btnWarehouse.Text = "Warehouse";
         btnOrder.Text = "Orders";
         btnStat.Text = "Statistics";
+        btnWarranty.Text = "Warranty";
 
         btnProduct.SetBounds(30, 20, 200, 35);
         btnSupplier.SetBounds(30, 60, 200, 35);
@@ -40,6 +43,7 @@ partial class MenuForm
         btnWarehouse.SetBounds(30, 140, 200, 35);
         btnOrder.SetBounds(30, 180, 200, 35);
         btnStat.SetBounds(30, 220, 200, 35);
+        btnWarranty.SetBounds(30, 260, 200, 35);
 
         btnProduct.Click += btnProduct_Click;
         btnSupplier.Click += btnSupplier_Click;
@@ -47,15 +51,16 @@ partial class MenuForm
         btnWarehouse.Click += btnWarehouse_Click;
         btnOrder.Click += btnOrder_Click;
         btnStat.Click += btnStat_Click;
+        btnWarranty.Click += btnWarranty_Click;
 
         Controls.AddRange(new Control[]
         {
             btnProduct, btnSupplier, btnEmployee,
-            btnWarehouse, btnOrder, btnStat
+            btnWarehouse, btnOrder,  btnStat, btnWarranty
         });
 
         Text = "Phone Store Management";
-        ClientSize = new System.Drawing.Size(280, 280);
+        ClientSize = new System.Drawing.Size(300, 300);
         StartPosition = FormStartPosition.CenterScreen;
     }
 }

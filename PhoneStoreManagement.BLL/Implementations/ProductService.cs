@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using PhoneStoreManagement.Data;
 using PhoneStoreManagement.Entity.Entities;
 using PhoneStoreManagement.Services.Interfaces;
@@ -81,5 +82,12 @@ public class ProductService : IProductService
 
         _db.Products.Remove(p);
         await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task<bool> ExistsProductName(string productName, int excludeId = 0, CancellationToken ct = default)
+    {
+        return await _db.Products.AnyAsync(x =>
+            x.ProductName.ToLower() == productName.ToLower().Trim()
+            && x.ProductId != excludeId, ct);
     }
 }

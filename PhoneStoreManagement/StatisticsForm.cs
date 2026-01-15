@@ -21,60 +21,109 @@ namespace PhoneStoreManagement.Winforms
 
         private async void StatisticForm_Load(object sender, EventArgs e)
         {
-            await LoadInvoicesAsync();
+            try
+            {
+                await LoadInvoicesAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khởi tạo form: {ex.Message}");
+            }
         }
 
         // ===== LOAD INVOICE =====
         private async Task LoadInvoicesAsync(string? keyword = null)
         {
-            _invoices = await _reportService.GetInvoicesAsync(keyword);
-
-            dgvInvoices.DataSource = _invoices.Select(x => new
+            try
             {
-                x.InvoiceId,
-                CustomerName = x.Customer.FullName,
-                Address = x.Customer.Address,
-                BuyDate = x.InvoiceDate,
-                EmployeeCode = x.Employee.EmployeeCode,
-                TotalAmount = x.TotalAmount
-            }).ToList();
+                _invoices = await _reportService.GetInvoicesAsync(keyword);
 
-            lblTotalRevenue.Text =
-                $"Tổng doanh thu: {_invoices.Sum(x => x.TotalAmount):N0} VNĐ";
+                if (_invoices == null)
+                {
+                    dgvInvoices.DataSource = null;
+                    lblTotalRevenue.Text = "Tổng doanh thu: 0 VNĐ";
+                    return;
+                }
+
+                dgvInvoices.DataSource = _invoices.Select(x => new
+                {
+                    x.InvoiceId,
+                    CustomerName = x.Customer?.FullName ?? "N/A",
+                    Address = x.Customer?.Address ?? "N/A",
+                    BuyDate = x.InvoiceDate,
+                    EmployeeCode = x.Employee?.EmployeeCode ?? "N/A",
+                    TotalAmount = x.TotalAmount
+                }).ToList();
+
+                lblTotalRevenue.Text = $"Tổng doanh thu: {_invoices.Sum(x => x.TotalAmount):N0} VNĐ";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi tải danh sách hóa đơn: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private async void btnSearch_Click(object sender, EventArgs e)
         {
-            await LoadInvoicesAsync(txtSearch.Text.Trim());
+            try
+            {
+                await LoadInvoicesAsync(txtSearch.Text.Trim());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi tìm kiếm: {ex.Message}");
+            }
         }
 
         private void btnExportExcel_Click(object sender, EventArgs e)
         {
-            using var dialog = new SaveFileDialog
+            try
             {
-                Filter = "Excel Files (*.xlsx)|*.xlsx",
-                FileName = $"Invoices_{DateTime.Now:yyyyMMddHHmmss}.xlsx"
-            };
+                if (_invoices == null || !_invoices.Any())
+                {
+                    MessageBox.Show("Không có dữ liệu để xuất Excel!", "Thông báo");
+                    return;
+                }
 
-            if (dialog.ShowDialog() != DialogResult.OK)
-                return;
+                using var dialog = new SaveFileDialog
+                {
+                    Filter = "Excel Files (*.xlsx)|*.xlsx",
+                    FileName = $"Invoices_{DateTime.Now:yyyyMMddHHmmss}.xlsx"
+                };
 
-            var bytes = _reportService.ExportInvoiceExcelBytes(_invoices);
-            File.WriteAllBytes(dialog.FileName, bytes);
+                if (dialog.ShowDialog() != DialogResult.OK)
+                    return;
 
-            MessageBox.Show("Xuất Excel thành công!");
+                var bytes = _reportService.ExportInvoiceExcelBytes(_invoices);
+                System.IO.File.WriteAllBytes(dialog.FileName, bytes);
+
+                MessageBox.Show("Xuất Excel thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi xuất Excel: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void dgvInvoices_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex < 0) return;
+            try
+            {
+                if (e.RowIndex < 0) return;
 
-            int invoiceId = Convert.ToInt32(
-                dgvInvoices.Rows[e.RowIndex].Cells["InvoiceId"].Value
-            );
+                // Sử dụng TryParse hoặc kiểm tra null để an toàn hơn
+                var cellValue = dgvInvoices.Rows[e.RowIndex].Cells["InvoiceId"].Value;
+                if (cellValue == null) return;
 
-            using var frm = new InvoiceDetailForm(invoiceId, _reportService);
-            frm.ShowDialog();
+                int invoiceId = Convert.ToInt32(cellValue);
+
+                using var frm = new InvoiceDetailForm(invoiceId, _reportService);
+                frm.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi xem chi tiết: {ex.Message}");
+            }
         }
     }
 }

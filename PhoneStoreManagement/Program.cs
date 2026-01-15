@@ -34,6 +34,7 @@ internal static class Program
         services.AddScoped<IInvoiceService, InvoiceService>();
         services.AddScoped<ICustomerService, CustomerService>();
         services.AddScoped<IReportService, ReportService>();
+        services.AddScoped<IWarrantyService, WarrantyService>();
 
         // ===== REPOSITORY + UOW =====
         services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -52,6 +53,7 @@ internal static class Program
         services.AddScoped<WarehouseForm>();
         services.AddScoped<OrderCreateForm>();
         services.AddScoped<StatisticForm>();
+        services.AddScoped<WarrantyForm>();
 
         var sp = services.BuildServiceProvider();
 

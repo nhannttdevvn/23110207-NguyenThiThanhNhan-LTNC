@@ -11,6 +11,9 @@ public class ProductRepository : RepositoryBase<Product>, IProductRepository
 {
     public ProductRepository(PhoneDbContext db) : base(db) { }
 
+  
+
+
     public Task<List<Product>> SearchAsync(string keyword, CancellationToken ct = default)
     {
         keyword = (keyword ?? "").Trim().ToLower();
@@ -32,4 +35,6 @@ public class ProductRepository : RepositoryBase<Product>, IProductRepository
             .OrderBy(x => x.ProductName)
             .ToListAsync(ct);
     }
+    public IQueryable<Product> GetAll()
+        => Db.Products.AsQueryable();
 }

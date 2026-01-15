@@ -138,6 +138,20 @@ namespace PhoneStoreManagement.Data
                     .IsRequired();
             });
 
+            b.Entity<Warranty>(e =>
+            {
+                e.HasKey(x => x.WarrantyId);
+
+                // Cấu hình quan hệ với InvoiceItem
+                e.HasOne(x => x.InvoiceItem)
+                    .WithMany() // Một InvoiceItem có thể có bản ghi bảo hành (1-1 hoặc 1-n tùy nghiệp vụ)
+                    .HasForeignKey(x => x.InvoiceItemId)
+                    .OnDelete(DeleteBehavior.Cascade); // Xóa chi tiết hóa đơn thì xóa bảo hành
+
+                e.Property(x => x.CustomerName).HasMaxLength(200).IsRequired();
+                e.Property(x => x.CustomerPhone).HasMaxLength(20).IsRequired();
+            });
+
             // ================= ADMIN ACCOUNT (RIÊNG) =================
             b.Entity<AppAdminAccount>(e =>
             {

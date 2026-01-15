@@ -26,7 +26,7 @@ public class InvoiceService : IInvoiceService
 
         try
         {
-            // 1. CUSTOMER
+            // 1. XỬ LÝ KHÁCH HÀNG
             var customer = await _db.Customers
                 .FirstOrDefaultAsync(x => x.Phone == phone, ct);
 
@@ -42,24 +42,24 @@ public class InvoiceService : IInvoiceService
                 await _db.SaveChangesAsync(ct);
             }
 
-            // 2. INVOICE
+            // 2. TẠO HÓA ĐƠN (INVOICE)
             var invoice = new Invoice
             {
                 InvoiceNo = $"HD{DateTime.Now:yyyyMMddHHmmss}",
                 InvoiceType = "Sale",
                 InvoiceDate = DateTime.Now,
                 CustomerId = customer.CustomerId,
-                EmployeeId = employeeId,   // ✅ QUAN TRỌNG
+                EmployeeId = employeeId,
                 TotalAmount = 0,
                 Status = "Completed"
             };
 
             _db.Invoices.Add(invoice);
-            await _db.SaveChangesAsync(ct);
+            await _db.SaveChangesAsync(ct); // Lưu để lấy InvoiceId
 
             decimal total = 0;
 
-            // 3. ITEMS + TRỪ KHO
+            // 3. XỬ LÝ TỪNG SẢN PHẨM + TẠO BẢO HÀNH
             foreach (var (productId, quantity) in items)
             {
                 var product = await _db.Products
@@ -68,8 +68,10 @@ public class InvoiceService : IInvoiceService
                 if (product.Quantity < quantity)
                     throw new Exception($"Sản phẩm {product.ProductName} không đủ tồn kho");
 
+                // Trừ kho
                 product.Quantity -= quantity;
 
+                // Tạo chi tiết hóa đơn
                 var item = new InvoiceItem
                 {
                     InvoiceId = invoice.InvoiceId,
@@ -81,8 +83,23 @@ public class InvoiceService : IInvoiceService
 
                 total += item.LineTotal;
                 _db.InvoiceItems.Add(item);
+
+                // Lưu ngay để lấy được InvoiceItemId cho bảng Warranty
+                await _db.SaveChangesAsync(ct);
+
+                // TỰ ĐỘNG TẠO BẢO HÀNH CHO MỖI DÒNG SẢN PHẨM
+                var warranty = new Warranty
+                {
+                    InvoiceItemId = item.InvoiceItemId, // Lấy ID vừa sinh ra ở trên
+                    CustomerName = customerName,
+                    CustomerPhone = phone,
+                    StartDate = DateTime.Now,
+                    EndDate = DateTime.Now.AddMonths(12) // Mặc định 12 tháng
+                };
+                _db.Warranties.Add(warranty);
             }
 
+            // Cập nhật tổng tiền hóa đơn
             invoice.TotalAmount = total;
 
             await _db.SaveChangesAsync(ct);

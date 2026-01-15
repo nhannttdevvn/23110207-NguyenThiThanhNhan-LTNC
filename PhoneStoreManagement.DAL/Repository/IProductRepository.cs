@@ -11,5 +11,6 @@ namespace PhoneStoreManagement.Data.Repository;
 public interface IProductRepository : IRepository<Product>
 {
     Task<List<Product>> SearchAsync(string keyword, CancellationToken ct = default);
+
 }
 

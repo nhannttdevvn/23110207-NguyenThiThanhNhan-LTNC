@@ -14,6 +14,7 @@ public interface IProductService
     Task<Product?> GetAsync(int id, CancellationToken ct = default);
     Task<int> CreateAsync(Product p, CancellationToken ct = default);
     Task<Product?> GetByCodeAsync(string code, CancellationToken token = default);
+    Task<bool> ExistsProductName(string productName, int excludeId = 0, CancellationToken ct = default);
 
     Task UpdateAsync(Product p, CancellationToken ct = default);
     Task DeleteAsync(int id, CancellationToken ct = default);

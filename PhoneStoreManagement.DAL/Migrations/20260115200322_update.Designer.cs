@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PhoneStoreManagement.Data;
 
@@ -11,9 +12,11 @@ using PhoneStoreManagement.Data;
 namespace PhoneStoreManagement.Data.Migrations
 {
     [DbContext(typeof(PhoneDbContext))]
-    partial class PhoneDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260115200322_update")]
+    partial class update
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -56,9 +59,9 @@ namespace PhoneStoreManagement.Data.Migrations
                         new
                         {
                             AdminId = 1,
-                            CreatedDate = new DateTime(2026, 1, 16, 3, 19, 29, 519, DateTimeKind.Local).AddTicks(1635),
+                            CreatedDate = new DateTime(2026, 1, 16, 3, 3, 21, 134, DateTimeKind.Local).AddTicks(2354),
                             IsActive = true,
-                            PasswordHash = "4A9dXZz2esXLPggHYRV8YA==.P7DQ8KGtgE53bPzGosm/4nL1ea5OpTg1ulTrDPrc3gA=",
+                            PasswordHash = "X/MW9LxMyGNH3PXCQY4FsQ==.2gKVQx56cW1VhvQ3/yWhfzz+rHvi51VgYUwgovwZCvs=",
                             Username = "admin"
                         });
                 });
@@ -366,21 +369,16 @@ namespace PhoneStoreManagement.Data.Migrations
 
                     b.Property<string>("CustomerName")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CustomerPhone")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("InvoiceItemId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("InvoiceItemId1")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("StartDate")
@@ -391,8 +389,6 @@ namespace PhoneStoreManagement.Data.Migrations
                     b.HasIndex("CustomerId");
 
                     b.HasIndex("InvoiceItemId");
-
-                    b.HasIndex("InvoiceItemId1");
 
                     b.ToTable("Warranties");
                 });
@@ -474,14 +470,10 @@ namespace PhoneStoreManagement.Data.Migrations
                         .HasForeignKey("CustomerId");
 
                     b.HasOne("PhoneStoreManagement.Entity.Entities.InvoiceItem", "InvoiceItem")
-                        .WithMany()
+                        .WithMany("Warranties")
                         .HasForeignKey("InvoiceItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("PhoneStoreManagement.Entity.Entities.InvoiceItem", null)
-                        .WithMany("Warranties")
-                        .HasForeignKey("InvoiceItemId1");
 
                     b.Navigation("InvoiceItem");
                 });

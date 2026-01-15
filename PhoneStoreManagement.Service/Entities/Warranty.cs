@@ -1,27 +1,26 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace PhoneStoreManagement.Entity.Entities;
-
-public class Warranty
+namespace PhoneStoreManagement.Entity.Entities
 {
-    public int WarrantyId { get; set; }
-    public string WarrantyNo { get; set; } = "";
+    public class Warranty
+    {
+        [Key]
+        public int WarrantyId { get; set; }
 
-    public int InvoiceItemId { get; set; }
-    public int ProductId { get; set; }
-    public int CustomerId { get; set; }
+        public int InvoiceItemId { get; set; }
+        [ForeignKey("InvoiceItemId")]
+        public virtual InvoiceItem InvoiceItem { get; set; }
 
-    public DateTime StartDate { get; set; }
-    public DateTime EndDate { get; set; }
+        // Thêm các trường này để tránh lỗi 'TEntity does not contain...'
+        public string CustomerName { get; set; } 
+        public string CustomerPhone { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
 
-    public string Status { get; set; } = "Active";
-    public string? Note { get; set; }
+        [NotMapped]
+        public string Status => DateTime.Now <= EndDate ? "Còn hạn" : "Hết hạn";
 
-    public InvoiceItem? InvoiceItem { get; set; }
-    public Product? Product { get; set; }
-    public Customer? Customer { get; set; }
+    }
 }

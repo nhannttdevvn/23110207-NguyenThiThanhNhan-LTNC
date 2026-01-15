@@ -1,11 +1,9 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using PhoneStoreManagement.Entity.Entities;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-
-using Microsoft.EntityFrameworkCore;
-using PhoneStoreManagement.Entity.Entities;
 
 namespace PhoneStoreManagement.Data.Repository;
 
@@ -13,20 +11,33 @@ public class WarrantyRepository : RepositoryBase<Warranty>, IWarrantyRepository
 {
     public WarrantyRepository(PhoneDbContext db) : base(db) { }
 
-    public Task<List<Warranty>> LookupAsync(string phoneOrWarrantyNo, CancellationToken ct = default)
+    public async Task<List<Warranty>> LookupAsync(string keyword, CancellationToken ct = default)
     {
-        var key = (phoneOrWarrantyNo ?? "").Trim();
+        try
+        {
+            var key = (keyword ?? "").Trim();
 
-        var q = Db.Warranties
-            .Include(x => x.Customer)
-            .Include(x => x.Product)
-            .Include(x => x.InvoiceItem).ThenInclude(ii => ii!.Invoice)
-            .AsNoTracking()
-            .AsQueryable();
+            var q = Db.Warranties
+                .Include(x => x.InvoiceItem)
+                    .ThenInclude(ii => ii.Product)
+                .Include(x => x.InvoiceItem)
+                    .ThenInclude(ii => ii.Invoice)
+                .AsNoTracking();
 
-        if (key.Length == 0) return Task.FromResult(new List<Warranty>());
+            if (string.IsNullOrEmpty(key))
+            {
+                return await q.OrderByDescending(x => x.EndDate).ToListAsync(ct);
+            }
 
-        q = q.Where(x => x.WarrantyNo == key || (x.Customer != null && x.Customer.Phone == key));
-        return q.OrderByDescending(x => x.EndDate).ToListAsync(ct);
+            int.TryParse(key, out int id);
+
+            return await q.Where(x => x.WarrantyId == id || x.CustomerPhone.Contains(key))
+                          .OrderByDescending(x => x.EndDate)
+                          .ToListAsync(ct);
+        }
+        catch
+        {
+            return new List<Warranty>();
+        }
     }
 }
