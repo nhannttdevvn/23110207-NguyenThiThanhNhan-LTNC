@@ -4,6 +4,10 @@ partial class MenuForm
 {
     private System.ComponentModel.IContainer components = null;
 
+    private Panel pnlHeader;
+    private Label lblTitle;
+    private Panel pnlSidebar;
+    private Panel pnlContent;
     private Button btnProduct;
     private Button btnSupplier;
     private Button btnEmployee;
@@ -21,6 +25,10 @@ partial class MenuForm
 
     private void InitializeComponent()
     {
+        pnlHeader = new Panel();
+        lblTitle = new Label();
+        pnlSidebar = new Panel();
+        pnlContent = new Panel();
         btnProduct = new Button();
         btnSupplier = new Button();
         btnEmployee = new Button();
@@ -29,21 +37,36 @@ partial class MenuForm
         btnStat = new Button();
         btnWarranty = new Button();
 
-        btnProduct.Text = "Products";
-        btnSupplier.Text = "Suppliers";
-        btnEmployee.Text = "Employees";
-        btnWarehouse.Text = "Warehouse";
-        btnOrder.Text = "Orders";
-        btnStat.Text = "Statistics";
-        btnWarranty.Text = "Warranty";
+        pnlHeader.SuspendLayout();
+        pnlSidebar.SuspendLayout();
+        SuspendLayout();
 
-        btnProduct.SetBounds(30, 20, 200, 35);
-        btnSupplier.SetBounds(30, 60, 200, 35);
-        btnEmployee.SetBounds(30, 100, 200, 35);
-        btnWarehouse.SetBounds(30, 140, 200, 35);
-        btnOrder.SetBounds(30, 180, 200, 35);
-        btnStat.SetBounds(30, 220, 200, 35);
-        btnWarranty.SetBounds(30, 260, 200, 35);
+        // pnlHeader
+        pnlHeader.BackColor = Color.FromArgb(41, 128, 185);
+        pnlHeader.Controls.Add(lblTitle);
+        pnlHeader.Dock = DockStyle.Top;
+        pnlHeader.Height = 70;
+
+        lblTitle.AutoSize = true;
+        lblTitle.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
+        lblTitle.ForeColor = Color.White;
+        lblTitle.Location = new Point(20, 15);
+        lblTitle.Text = "HỆ THỐNG QUẢN LÝ CỬA HÀNG";
+
+        // pnlSidebar
+        pnlSidebar.BackColor = Color.FromArgb(52, 73, 94);
+        pnlSidebar.Dock = DockStyle.Left;
+        pnlSidebar.Width = 250;
+        pnlSidebar.Padding = new Padding(10, 20, 10, 0);
+
+        // Sidebar Buttons Configuration
+        ConfigureMenuButton(btnProduct, "Sản phẩm", 0);
+        ConfigureMenuButton(btnSupplier, "Nhà cung cấp", 1);
+        ConfigureMenuButton(btnEmployee, "Nhân viên", 2);
+        ConfigureMenuButton(btnWarehouse, "Kho hàng", 3);
+        ConfigureMenuButton(btnOrder, "Đơn hàng", 4);
+        ConfigureMenuButton(btnStat, "Thống kê", 5);
+        ConfigureMenuButton(btnWarranty, "Bảo hành", 6);
 
         btnProduct.Click += btnProduct_Click;
         btnSupplier.Click += btnSupplier_Click;
@@ -53,14 +76,39 @@ partial class MenuForm
         btnStat.Click += btnStat_Click;
         btnWarranty.Click += btnWarranty_Click;
 
-        Controls.AddRange(new Control[]
-        {
-            btnProduct, btnSupplier, btnEmployee,
-            btnWarehouse, btnOrder,  btnStat, btnWarranty
-        });
+        // pnlContent
+        pnlContent.Dock = DockStyle.Fill;
+        pnlContent.BackColor = Color.WhiteSmoke;
 
-        Text = "Phone Store Management";
-        ClientSize = new System.Drawing.Size(300, 300);
+        // MenuForm
+        ClientSize = new Size(1200, 750);
+        Controls.Add(pnlContent);
+        Controls.Add(pnlSidebar);
+        Controls.Add(pnlHeader);
         StartPosition = FormStartPosition.CenterScreen;
+        Text = "Phone Store Management System";
+
+        pnlHeader.ResumeLayout(false);
+        pnlHeader.PerformLayout();
+        pnlSidebar.ResumeLayout(false);
+        ResumeLayout(false);
+    }
+
+    private void ConfigureMenuButton(Button btn, string text, int index)
+    {
+        btn.Text = text;
+        btn.Dock = DockStyle.Top;
+        btn.Height = 50;
+        btn.FlatStyle = FlatStyle.Flat;
+        btn.FlatAppearance.BorderSize = 0;
+        btn.ForeColor = Color.White;
+        btn.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
+        btn.TextAlign = ContentAlignment.MiddleLeft;
+        btn.Padding = new Padding(20, 0, 0, 0);
+        btn.Margin = new Padding(0, 0, 0, 5);
+        btn.BackColor = Color.Transparent;
+        btn.Cursor = Cursors.Hand;
+        pnlSidebar.Controls.Add(btn);
+        btn.BringToFront();
     }
 }

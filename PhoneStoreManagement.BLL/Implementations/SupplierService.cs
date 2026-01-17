@@ -14,7 +14,7 @@ namespace PhoneStoreManagement.Services.Implementations
     public class SupplierService : ISupplierService
     {
         private readonly IUnitOfWork _uow;
-
+        private readonly IRepository<Supplier> _repository; 
         public SupplierService(IUnitOfWork uow)
         {
             _uow = uow;

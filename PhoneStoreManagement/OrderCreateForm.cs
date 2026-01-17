@@ -1,11 +1,13 @@
-﻿// ===== OrderCreateForm.cs (FULL – đã thêm try-catch) =====
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using PhoneStoreManagement.Data;
 using PhoneStoreManagement.Entity.Entities;
 using PhoneStoreManagement.Services.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace PhoneStoreManagement.Winforms
@@ -14,13 +16,15 @@ namespace PhoneStoreManagement.Winforms
     {
         private readonly IInvoiceService _invoiceSvc;
         private readonly PhoneDbContext _db;
+        private readonly IReportService _reportService; // ✅ Thêm Service báo cáo để dùng cho Form chi tiết
 
         private readonly BindingList<InvoiceItem> _cart = new();
 
-        public OrderCreateForm(IInvoiceService invoiceSvc, PhoneDbContext db)
+        public OrderCreateForm(IInvoiceService invoiceSvc, PhoneDbContext db, IReportService reportService)
         {
             _invoiceSvc = invoiceSvc;
             _db = db;
+            _reportService = reportService; // ✅ Nhận service từ DI
 
             InitializeComponent();
             ConfigGrid();
@@ -30,7 +34,7 @@ namespace PhoneStoreManagement.Winforms
             cboProduct.SelectedIndexChanged += cboProduct_SelectedIndexChanged;
         }
 
-        // ================= LOAD =================
+        // ================= LOAD DỮ LIỆU BAN ĐẦU =================
         private void LoadData()
         {
             try
@@ -39,7 +43,6 @@ namespace PhoneStoreManagement.Winforms
                 txtPhone.Clear();
                 txtAddress.Clear();
 
-                // ✅ LOAD NHÂN VIÊN
                 cboEmployee.DataSource = _db.AppUsers
                     .AsNoTracking()
                     .Where(x => x.AppRoleId == 2)
@@ -52,10 +55,9 @@ namespace PhoneStoreManagement.Winforms
                 LoadProducts();
 
                 numQty.Value = 1;
-
                 lblOrderNo.Text = $"HD{DateTime.Now:yyyyMMddHHmmss}";
                 lblDate.Text = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
-                lblTotal.Text = "0";
+                lblTotal.Text = "0 VNĐ";
 
                 _cart.Clear();
             }
@@ -88,13 +90,17 @@ namespace PhoneStoreManagement.Winforms
             }
         }
 
-        // ================= PHONE CHECK =================
         private void txtPhone_Leave(object sender, EventArgs e)
         {
             try
             {
-                var phone = txtPhone.Text.Trim();
+                string phone = txtPhone.Text.Trim();
                 if (string.IsNullOrEmpty(phone)) return;
+
+                if (!Regex.IsMatch(phone, @"^0\d{9}$"))
+                {
+                    return; // Không hiện Messagebox để tránh phiền người dùng khi đang nhập
+                }
 
                 var customer = _db.Customers
                     .AsNoTracking()
@@ -108,159 +114,83 @@ namespace PhoneStoreManagement.Winforms
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi tra cứu thông tin khách hàng: " + ex.Message);
+                MessageBox.Show("Lỗi tra cứu khách hàng: " + ex.Message);
             }
         }
 
-        // ================= PRODUCT CHANGE =================
         private void cboProduct_SelectedIndexChanged(object sender, EventArgs e)
         {
             try
             {
                 if (cboProduct.SelectedItem is not Product product) return;
-
                 numQty.Maximum = product.Quantity;
-                if (numQty.Value > product.Quantity)
-                    numQty.Value = product.Quantity;
+                if (numQty.Value > product.Quantity) numQty.Value = product.Quantity;
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Lỗi xử lý chọn sản phẩm: " + ex.Message);
-            }
+            catch (Exception ex) { MessageBox.Show(ex.Message); }
         }
 
-        // ================= GRID =================
         private void ConfigGrid()
         {
             dgvItems.AutoGenerateColumns = false;
             dgvItems.Columns.Clear();
-
-            dgvItems.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                HeaderText = "Sản phẩm",
-                DataPropertyName = "ProductName",
-                Width = 180
-            });
-
-            dgvItems.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                HeaderText = "SL",
-                DataPropertyName = "Quantity",
-                Width = 60
-            });
-
-            dgvItems.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                HeaderText = "Đơn giá",
-                DataPropertyName = "UnitPrice",
-                Width = 90
-            });
-
-            dgvItems.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                HeaderText = "Thành tiền",
-                DataPropertyName = "LineTotal",
-                Width = 100
-            });
-
+            dgvItems.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Sản phẩm", DataPropertyName = "ProductName", Width = 180 });
+            dgvItems.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "SL", DataPropertyName = "Quantity", Width = 60 });
+            dgvItems.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Đơn giá", DataPropertyName = "UnitPrice", Width = 110, DefaultCellStyle = new DataGridViewCellStyle { Format = "N0" } });
+            dgvItems.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Thành tiền", DataPropertyName = "LineTotal", Width = 130, DefaultCellStyle = new DataGridViewCellStyle { Format = "N0" } });
             dgvItems.DataSource = _cart;
         }
 
-        // ================= ADD =================
         private void btnAdd_Click(object sender, EventArgs e)
         {
             try
             {
-                if (cboProduct.SelectedItem is not Product product)
-                {
-                    MessageBox.Show("Chưa chọn sản phẩm");
-                    return;
-                }
-
+                if (cboProduct.SelectedItem is not Product product) return;
                 int qty = (int)numQty.Value;
-
-                if (qty <= 0 || qty > product.Quantity)
-                {
-                    MessageBox.Show("Số lượng không hợp lệ hoặc vượt tồn kho");
-                    return;
-                }
-
                 var existed = _cart.FirstOrDefault(x => x.ProductId == product.ProductId);
 
                 if (existed != null)
                 {
-                    if (existed.Quantity + qty > product.Quantity)
-                    {
-                        MessageBox.Show("Tổng số lượng trong giỏ hàng vượt tồn kho");
-                        return;
-                    }
-
+                    if (existed.Quantity + qty > product.Quantity) { MessageBox.Show("Vượt tồn kho!"); return; }
                     existed.Quantity += qty;
                     existed.LineTotal = existed.Quantity * existed.UnitPrice;
                 }
                 else
                 {
-                    _cart.Add(new InvoiceItem
-                    {
-                        ProductId = product.ProductId,
-                        ProductName = product.ProductName,
-                        Quantity = qty,
-                        UnitPrice = product.SalePrice,
-                        LineTotal = qty * product.SalePrice
-                    });
+                    _cart.Add(new InvoiceItem { ProductId = product.ProductId, ProductName = product.ProductName, Quantity = qty, UnitPrice = product.SalePrice, LineTotal = qty * product.SalePrice });
                 }
-
                 ReloadGrid();
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Lỗi khi thêm vào giỏ hàng: " + ex.Message);
-            }
+            catch (Exception ex) { MessageBox.Show(ex.Message); }
         }
 
-        // ================= REMOVE =================
         private void btnRemove_Click(object sender, EventArgs e)
         {
-            try
-            {
-                if (dgvItems.CurrentRow?.DataBoundItem is not InvoiceItem item) return;
-
-                _cart.Remove(item);
-                ReloadGrid();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Lỗi khi xóa sản phẩm: " + ex.Message);
-            }
+            if (dgvItems.CurrentRow?.DataBoundItem is not InvoiceItem item) return;
+            _cart.Remove(item);
+            ReloadGrid();
         }
 
-        // ================= CREATE ORDER =================
+        // ================= XÁC NHẬN TẠO ĐƠN & XỬ LÝ HÓA ĐƠN =================
         private async void btnCreateOrder_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtCustomerName.Text)
-                || string.IsNullOrWhiteSpace(txtPhone.Text)
-                || string.IsNullOrWhiteSpace(txtAddress.Text))
+            if (string.IsNullOrWhiteSpace(txtCustomerName.Text) || string.IsNullOrWhiteSpace(txtPhone.Text))
             {
-                MessageBox.Show("Nhập đầy đủ thông tin khách hàng");
+                MessageBox.Show("Nhập đầy đủ thông tin khách hàng!");
                 return;
             }
 
-            if (cboEmployee.SelectedItem == null)
+            if (cboEmployee.SelectedValue == null || _cart.Count == 0)
             {
-                MessageBox.Show("Chọn nhân viên");
-                return;
-            }
-
-            if (_cart.Count == 0)
-            {
-                MessageBox.Show("Chưa có sản phẩm");
+                MessageBox.Show("Vui lòng chọn nhân viên và sản phẩm!");
                 return;
             }
 
             try
             {
                 btnCreateOrder.Enabled = false;
-                await _invoiceSvc.CreateOrderAsync(
+
+                // ✅ Giả định CreateOrderAsync trả về ID của hóa đơn mới tạo (int)
+                int newInvoiceId = await _invoiceSvc.CreateOrderAsync(
                     txtCustomerName.Text.Trim(),
                     txtPhone.Text.Trim(),
                     txtAddress.Text.Trim(),
@@ -268,8 +198,23 @@ namespace PhoneStoreManagement.Winforms
                     _cart.Select(x => (x.ProductId, x.Quantity)).ToList()
                 );
 
-                MessageBox.Show("Tạo đơn hàng thành công");
-                Close();
+                // ✅ Hiển thị thông báo với lựa chọn Xuất hóa đơn
+                var result = MessageBox.Show("Tạo đơn hàng thành công! Bạn có muốn XUẤT HÓA ĐƠN không?",
+                    "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                if (result == DialogResult.Yes)
+                {
+                    // ✅ Mở form chi tiết để người dùng nhấn nút Xuất Excel/In
+                    using var frm = new InvoiceDetailForm(newInvoiceId, _reportService);
+                    this.Hide();
+                    frm.ShowDialog();
+                    this.Close();
+                }
+                else
+                {
+                    this.DialogResult = DialogResult.OK;
+                    Close();
+                }
             }
             catch (Exception ex)
             {
@@ -281,23 +226,12 @@ namespace PhoneStoreManagement.Winforms
             }
         }
 
-        // ================= UI =================
         private void ReloadGrid()
         {
-            try
-            {
-                dgvItems.Refresh();
-                lblTotal.Text = _cart.Sum(x => x.LineTotal).ToString("N0");
-            }
-            catch
-            {
-                // UI update silent fail
-            }
+            dgvItems.ResetBindings();
+            lblTotal.Text = _cart.Sum(x => x.LineTotal).ToString("N0") + " VNĐ";
         }
 
-        private void btnCancel_Click(object sender, EventArgs e)
-        {
-            Close();
-        }
+        private void btnCancel_Click(object sender, EventArgs e) => Close();
     }
 }

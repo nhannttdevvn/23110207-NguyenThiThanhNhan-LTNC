@@ -21,23 +21,25 @@ public class InvoiceRepository : RepositoryBase<Invoice>, IInvoiceRepository
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.InvoiceId == invoiceId, ct);
 
-    public Task<List<Invoice>> SearchAsync(string keyword, CancellationToken ct = default)
+    public async Task<List<Invoice>> SearchAsync(string keyword, CancellationToken ct = default)
     {
         keyword = (keyword ?? "").Trim().ToLower();
+
         var q = Db.Invoices
             .Include(x => x.Supplier)
             .Include(x => x.Customer)
+            .Include(x => x.Employee)
             .AsNoTracking()
             .AsQueryable();
 
-        if (keyword.Length > 0)
+        if (!string.IsNullOrEmpty(keyword))
         {
             q = q.Where(x =>
-                x.InvoiceNo.ToLower().Contains(keyword) ||
-                x.Status.ToLower().Contains(keyword));
+                //x.InvoiceId.ToString().Contains(keyword) || // ✅ Tìm kiếm theo ID (kiểu số)
+                x.InvoiceNo.ToLower().Contains(keyword) ||  // Tìm theo Mã đơn hàng (chuỗi)
+                x.Customer.FullName.ToLower().Contains(keyword)); // Tìm theo Tên khách hàng
         }
 
-        return q.OrderByDescending(x => x.InvoiceDate).ToListAsync(ct);
+        return await q.OrderByDescending(x => x.InvoiceDate).ToListAsync(ct);
     }
 }
-

@@ -1,6 +1,7 @@
 ﻿using ClosedXML.Excel;
 using Microsoft.EntityFrameworkCore;
 using PhoneStoreManagement.Data;
+using PhoneStoreManagement.Data.Repository;
 using PhoneStoreManagement.Entity.Entities;
 using PhoneStoreManagement.Services.Interfaces;
 using System;
@@ -15,10 +16,12 @@ namespace PhoneStoreManagement.Services.Implementations;
 public class ReportService : IReportService
 {
     private readonly PhoneDbContext _db;
+    private readonly IInvoiceRepository _invoiceRepository;
 
-    public ReportService(PhoneDbContext db)
+    public ReportService(PhoneDbContext db, IInvoiceRepository invoiceRepository)
     {
         _db = db;
+        _invoiceRepository = invoiceRepository;
     }
 
     // 1. Lấy danh sách hóa đơn (Có Include đầy đủ để tránh lỗi Null)
@@ -28,26 +31,19 @@ public class ReportService : IReportService
         DateTime? toDate = null,
         CancellationToken ct = default)
     {
-        var query = _db.Invoices
-            .Include(x => x.Customer)
-            .Include(x => x.Employee) // Quan trọng: Tránh lỗi Employee null
-            .AsQueryable();
+        // 1. Gọi tầng DAL để lấy dữ liệu đã lọc theo từ khóa
+        var invoices = await _invoiceRepository.SearchAsync(keyword, ct);
 
-        if (!string.IsNullOrWhiteSpace(keyword))
-        {
-            keyword = keyword.Trim().ToLower();
-            query = query.Where(x =>
-                x.InvoiceCode.ToLower().Contains(keyword) ||
-                x.Customer.FullName.ToLower().Contains(keyword));
-        }
+        // 2. Tầng BLL xử lý logic nghiệp vụ bổ sung (Lọc theo ngày)
+        var filteredQuery = invoices.AsQueryable();
 
         if (fromDate.HasValue)
-            query = query.Where(x => x.InvoiceDate >= fromDate.Value);
+            filteredQuery = filteredQuery.Where(x => x.InvoiceDate >= fromDate.Value);
 
         if (toDate.HasValue)
-            query = query.Where(x => x.InvoiceDate <= toDate.Value);
+            filteredQuery = filteredQuery.Where(x => x.InvoiceDate <= toDate.Value);
 
-        return await query.OrderByDescending(x => x.InvoiceDate).ToListAsync(ct);
+        return filteredQuery.ToList();
     }
 
     // 2. Tính tổng doanh thu

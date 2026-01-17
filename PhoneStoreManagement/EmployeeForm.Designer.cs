@@ -4,7 +4,11 @@ partial class EmployeeForm
 {
     private System.ComponentModel.IContainer components = null;
 
-    private DataGridView dgvEmployees;
+    private Panel pnlHeader;
+    private Label lblTitle;
+    private GroupBox grpInput;
+    private GroupBox grpSearch;
+    private Panel pnlGridWrapper; // Panel phụ để tạo Margin
 
     private Label lblEmployeeCode;
     private Label lblFullName;
@@ -12,7 +16,6 @@ partial class EmployeeForm
     private Label lblEmail;
     private Label lblHomeTown;
     private Label lblUsername;
-    private Label lblSearch;
 
     private TextBox txtEmployeeCode;
     private TextBox txtFullName;
@@ -26,6 +29,7 @@ partial class EmployeeForm
     private Button btnUpdate;
     private Button btnDelete;
     private Button btnSearch;
+    private DataGridView dgvEmployees;
 
     protected override void Dispose(bool disposing)
     {
@@ -36,6 +40,11 @@ partial class EmployeeForm
 
     private void InitializeComponent()
     {
+        pnlHeader = new Panel();
+        lblTitle = new Label();
+        grpInput = new GroupBox();
+        grpSearch = new GroupBox();
+        pnlGridWrapper = new Panel();
         dgvEmployees = new DataGridView();
 
         lblEmployeeCode = new Label();
@@ -44,7 +53,6 @@ partial class EmployeeForm
         lblEmail = new Label();
         lblHomeTown = new Label();
         lblUsername = new Label();
-        lblSearch = new Label();
 
         txtEmployeeCode = new TextBox();
         txtFullName = new TextBox();
@@ -60,108 +68,175 @@ partial class EmployeeForm
         btnSearch = new Button();
 
         ((System.ComponentModel.ISupportInitialize)dgvEmployees).BeginInit();
+        pnlHeader.SuspendLayout();
+        grpInput.SuspendLayout();
+        grpSearch.SuspendLayout();
+        pnlGridWrapper.SuspendLayout();
         SuspendLayout();
 
-        // ===== FORM =====
-        Text = "Quản lý nhân viên";
-        ClientSize = new Size(1000, 520);
-        StartPosition = FormStartPosition.CenterScreen;
+        // ===== pnlHeader =====
+        pnlHeader.BackColor = Color.FromArgb(52, 152, 219);
+        pnlHeader.Controls.Add(lblTitle);
+        pnlHeader.Dock = DockStyle.Top;
+        pnlHeader.Location = new Point(0, 0);
+        pnlHeader.Name = "pnlHeader";
+        pnlHeader.Size = new Size(1100, 60);
 
-        // ===== LAYOUT CONFIG =====
-        int labelW = 100;
-        int inputW = 220;
-        int rowH = 26;
-        int gapY = 36;
+        lblTitle.AutoSize = true;
+        lblTitle.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
+        lblTitle.ForeColor = Color.White;
+        lblTitle.Location = new Point(12, 13);
+        lblTitle.Text = "QUẢN LÝ NHÂN VIÊN";
 
-        int leftX = 20;
-        int rightX = 360;
-        int y = 20;
+        // ===== grpSearch =====
+        grpSearch.Controls.Add(txtSearch);
+        grpSearch.Controls.Add(btnSearch);
+        grpSearch.Dock = DockStyle.Top;
+        grpSearch.Font = new Font("Segoe UI", 10F);
+        grpSearch.Location = new Point(0, 60);
+        grpSearch.Size = new Size(1100, 80);
+        grpSearch.Text = "Tìm kiếm";
 
-        // ===== SEARCH =====
-        lblSearch.Text = "Tìm kiếm";
-        lblSearch.SetBounds(rightX, y + 5, labelW, rowH);
+        txtSearch.Location = new Point(20, 35);
+        txtSearch.Size = new Size(350, 29);
 
-        txtSearch.SetBounds(rightX + labelW + 10, y, 220, rowH);
-        txtSearch.TextChanged += txtSearch_TextChanged;
+        btnSearch.BackColor = Color.FromArgb(46, 204, 113);
+        btnSearch.FlatStyle = FlatStyle.Flat;
+        btnSearch.ForeColor = Color.White;
+        btnSearch.Location = new Point(380, 33);
+        btnSearch.Size = new Size(100, 33);
+        btnSearch.Text = "Tìm kiếm";
+        //in đậm
+        btnSearch.Font = new Font(btnSearch.Font, FontStyle.Bold);
+        btnSearch.UseVisualStyleBackColor = false;
 
-        btnSearch.Text = "Search";
-        btnSearch.SetBounds(rightX + labelW + 240, y - 1, 90, 30);
-        btnSearch.Click += btnSearch_Click;
+        // ===== grpInput (Left Side) =====
+        grpInput.Dock = DockStyle.Left;
+        grpInput.Width = 350;
+        grpInput.Text = "Thông tin chi tiết";
+        grpInput.Font = new Font("Segoe UI", 9F);
 
-        // ===== INPUT =====
-        y += gapY;
+        int labelX = 15;
+        int inputX = 110;
+        int y = 40;
+        int gap = 40;
 
-        lblEmployeeCode.Text = "Mã NV";
-        lblEmployeeCode.SetBounds(leftX, y + 5, labelW, rowH);
-        txtEmployeeCode.SetBounds(leftX + labelW + 10, y, inputW, rowH);
+        lblEmployeeCode.Text = "Mã NV:";
+        lblEmployeeCode.Location = new Point(labelX, y);
+        txtEmployeeCode.Location = new Point(inputX, y - 3);
+        txtEmployeeCode.Size = new Size(220, 25);
         txtEmployeeCode.ReadOnly = true;
 
-        y += gapY;
-        lblFullName.Text = "Họ tên";
-        lblFullName.SetBounds(leftX, y + 5, labelW, rowH);
-        txtFullName.SetBounds(leftX + labelW + 10, y, inputW, rowH);
+        y += gap;
+        lblFullName.Text = "Họ tên:";
+        lblFullName.Location = new Point(labelX, y);
+        txtFullName.Location = new Point(inputX, y - 3);
+        txtFullName.Size = new Size(220, 25);
 
-        y += gapY;
-        lblPhone.Text = "SĐT";
-        lblPhone.SetBounds(leftX, y + 5, labelW, rowH);
-        txtPhone.SetBounds(leftX + labelW + 10, y, inputW, rowH);
+        y += gap;
+        lblPhone.Text = "SĐT:";
+        lblPhone.Location = new Point(labelX, y);
+        txtPhone.Location = new Point(inputX, y - 3);
+        txtPhone.Size = new Size(220, 25);
 
-        y += gapY;
-        lblEmail.Text = "Email";
-        lblEmail.SetBounds(leftX, y + 5, labelW, rowH);
-        txtEmail.SetBounds(leftX + labelW + 10, y, inputW, rowH);
+        y += gap;
+        lblEmail.Text = "Email:";
+        lblEmail.Location = new Point(labelX, y);
+        txtEmail.Location = new Point(inputX, y - 3);
+        txtEmail.Size = new Size(220, 25);
 
-        y += gapY;
-        lblHomeTown.Text = "Quê quán";
-        lblHomeTown.SetBounds(leftX, y + 5, labelW, rowH);
-        txtHomeTown.SetBounds(leftX + labelW + 10, y, inputW, rowH);
+        y += gap;
+        lblHomeTown.Text = "Quê quán:";
+        lblHomeTown.Location = new Point(labelX, y);
+        txtHomeTown.Location = new Point(inputX, y - 3);
+        txtHomeTown.Size = new Size(220, 25);
 
-        y += gapY;
-        lblUsername.Text = "Tài khoản";
-        lblUsername.SetBounds(leftX, y + 5, labelW, rowH);
-        txtUsername.SetBounds(leftX + labelW + 10, y, inputW, rowH);
+        y += gap;
+        lblUsername.Text = "Tài khoản:";
+        lblUsername.Location = new Point(labelX, y);
+        txtUsername.Location = new Point(inputX, y - 3);
+        txtUsername.Size = new Size(220, 25);
 
-        // ===== BUTTONS =====
-        y += gapY + 10;
-
+        y += gap + 20;
         btnAdd.Text = "Thêm";
-        btnAdd.SetBounds(leftX, y, 90, 32);
-        btnAdd.Click += btnAdd_Click;
+        btnAdd.BackColor = Color.DodgerBlue;
+        btnAdd.ForeColor = Color.White;
+        btnAdd.FlatStyle = FlatStyle.Flat;
+        btnAdd.Location = new Point(20, y);
+        btnAdd.Size = new Size(90, 35);
+        //in đậm
+        btnAdd.Font = new Font(btnAdd.Font, FontStyle.Bold);
 
         btnUpdate.Text = "Sửa";
-        btnUpdate.SetBounds(leftX + 100, y, 90, 32);
-        btnUpdate.Click += btnUpdate_Click;
-
+        btnUpdate.BackColor = Color.Orange;
+        btnUpdate.ForeColor = Color.White;
+        btnUpdate.FlatStyle = FlatStyle.Flat;
+        btnUpdate.Location = new Point(120, y);
+        btnUpdate.Size = new Size(90, 35);
+        //in đậm
+        btnUpdate.Font = new Font(btnUpdate.Font, FontStyle.Bold);
         btnDelete.Text = "Xóa";
-        btnDelete.SetBounds(leftX + 200, y, 90, 32);
-        btnDelete.Click += btnDelete_Click;
+        btnDelete.BackColor = Color.Crimson;
+        btnDelete.ForeColor = Color.White;
+        btnDelete.FlatStyle = FlatStyle.Flat;
+        btnDelete.Location = new Point(220, y);
+        btnDelete.Size = new Size(90, 35);
+        //in đậm
+        btnDelete.Font = new Font(btnDelete.Font, FontStyle.Bold);
 
-        // ===== GRID =====
-        dgvEmployees.SetBounds(rightX, 70, 600, 380);
+        grpInput.Controls.AddRange(new Control[] {
+            lblEmployeeCode, txtEmployeeCode, lblFullName, txtFullName,
+            lblPhone, txtPhone, lblEmail, txtEmail, lblHomeTown, txtHomeTown,
+            lblUsername, txtUsername, btnAdd, btnUpdate, btnDelete
+        });
+
+        // ===== pnlGridWrapper (Margin cho DataGridView) =====
+        pnlGridWrapper.Dock = DockStyle.Fill;
+        pnlGridWrapper.Padding = new Padding(15, 0, 15, 15);
+        pnlGridWrapper.BackColor = Color.White;
+        pnlGridWrapper.Controls.Add(dgvEmployees);
+
+        // ===== dgvEmployees Style =====
+        dgvEmployees.Dock = DockStyle.Fill;
+        dgvEmployees.BackgroundColor = Color.White;
+        dgvEmployees.BorderStyle = BorderStyle.None;
+        dgvEmployees.EnableHeadersVisualStyles = false;
         dgvEmployees.ReadOnly = true;
         dgvEmployees.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         dgvEmployees.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-        dgvEmployees.CellClick += dgvEmployees_CellClick;
+        dgvEmployees.RowHeadersVisible = false;
+        dgvEmployees.GridColor = Color.FromArgb(236, 240, 241);
 
-        // ===== ADD CONTROLS =====
-        Controls.AddRange(new Control[]
-        {
-        lblSearch, txtSearch, btnSearch,
+        // Header Style (Xanh đậm)
+        dgvEmployees.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+        dgvEmployees.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(41, 128, 185);
+        dgvEmployees.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
+        dgvEmployees.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+        dgvEmployees.ColumnHeadersHeight = 40;
 
-        lblEmployeeCode, txtEmployeeCode,
-        lblFullName, txtFullName,
-        lblPhone, txtPhone,
-        lblEmail, txtEmail,
-        lblHomeTown, txtHomeTown,
-        lblUsername, txtUsername,
+        // Selection Style (Xanh nhạt)
+        dgvEmployees.DefaultCellStyle.SelectionBackColor = Color.FromArgb(214, 234, 248);
+        dgvEmployees.DefaultCellStyle.SelectionForeColor = Color.Black;
+        dgvEmployees.DefaultCellStyle.Font = new Font("Segoe UI", 9F);
+        dgvEmployees.RowTemplate.Height = 35;
 
-        btnAdd, btnUpdate, btnDelete,
-        dgvEmployees
-        });
+        // ===== Form Config =====
+        ClientSize = new Size(1100, 600);
+        StartPosition = FormStartPosition.CenterScreen;
+        Text = "Quản lý nhân viên";
+        Controls.Add(pnlGridWrapper);
+        Controls.Add(grpInput);
+        Controls.Add(grpSearch);
+        Controls.Add(pnlHeader);
 
+        pnlHeader.ResumeLayout(false);
+        pnlHeader.PerformLayout();
+        grpSearch.ResumeLayout(false);
+        grpSearch.PerformLayout();
+        grpInput.ResumeLayout(false);
+        grpInput.PerformLayout();
+        pnlGridWrapper.ResumeLayout(false);
         ((System.ComponentModel.ISupportInitialize)dgvEmployees).EndInit();
         ResumeLayout(false);
-        PerformLayout();
     }
-
 }

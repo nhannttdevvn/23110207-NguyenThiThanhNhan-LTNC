@@ -17,6 +17,10 @@ namespace PhoneStoreManagement.Winforms
         {
             _reportService = reportService;
             InitializeComponent();
+
+            dgvInvoices.CellDoubleClick += dgvInvoices_CellDoubleClick;
+
+            this.Load += StatisticForm_Load;
         }
 
         private async void StatisticForm_Load(object sender, EventArgs e)
@@ -28,6 +32,21 @@ namespace PhoneStoreManagement.Winforms
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi khởi tạo form: {ex.Message}");
+            }
+        }
+
+        private void ConfigureGrid()
+        {
+            if (dgvInvoices.Columns.Count > 0)
+            {
+                dgvInvoices.Columns["InvoiceNo"].HeaderText = "Mã hóa đơn";
+                dgvInvoices.Columns["CustomerName"].HeaderText = "Tên khách hàng";
+                dgvInvoices.Columns["Address"].HeaderText = "Địa chỉ";
+                dgvInvoices.Columns["BuyDate"].HeaderText = "Ngày mua";
+                dgvInvoices.Columns["BuyDate"].DefaultCellStyle.Format = "dd/MM/yyyy HH:mm";
+                dgvInvoices.Columns["EmployeeCode"].HeaderText = "Mã nhân viên";
+                dgvInvoices.Columns["TotalAmount"].HeaderText = "Tổng tiền";
+                dgvInvoices.Columns["TotalAmount"].DefaultCellStyle.Format = "N0";
             }
         }
 
@@ -47,13 +66,15 @@ namespace PhoneStoreManagement.Winforms
 
                 dgvInvoices.DataSource = _invoices.Select(x => new
                 {
-                    x.InvoiceId,
+                    x.InvoiceNo,
                     CustomerName = x.Customer?.FullName ?? "N/A",
                     Address = x.Customer?.Address ?? "N/A",
                     BuyDate = x.InvoiceDate,
                     EmployeeCode = x.Employee?.EmployeeCode ?? "N/A",
                     TotalAmount = x.TotalAmount
                 }).ToList();
+
+                ConfigureGrid();
 
                 lblTotalRevenue.Text = $"Tổng doanh thu: {_invoices.Sum(x => x.TotalAmount):N0} VNĐ";
             }
@@ -113,6 +134,7 @@ namespace PhoneStoreManagement.Winforms
 
                 // Sử dụng TryParse hoặc kiểm tra null để an toàn hơn
                 var cellValue = dgvInvoices.Rows[e.RowIndex].Cells["InvoiceId"].Value;
+                // lấy id hóa đơn, mở form xem chi tiết
                 if (cellValue == null) return;
 
                 int invoiceId = Convert.ToInt32(cellValue);

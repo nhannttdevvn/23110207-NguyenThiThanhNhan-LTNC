@@ -4,7 +4,7 @@ namespace PhoneStoreManagement.Services.Interfaces;
 
 public interface IInvoiceService
 {
-    Task CreateOrderAsync(
+    Task<int> CreateOrderAsync(
         string customerName,
         string phone,
         string address,

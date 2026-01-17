@@ -17,9 +17,27 @@ public partial class ProductForm : Form
     {
         _productService = productService;
         _supplierService = supplierService;
+       
         InitializeComponent();
         ConfigureGrid();
+
+        this.Load += ProductForm_Load;
+
+        dgvProducts.CellFormatting += dgvProducts_CellFormatting;
     }
+
+    private void dgvProducts_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+    {
+        if (dgvProducts.Columns[e.ColumnIndex].Name == "SupplierName")
+        {
+            if (dgvProducts.Rows[e.RowIndex].DataBoundItem is Product p)
+            {
+                e.Value = p.Supplier?.SupplierName ?? "N/A";
+            }
+        }
+    }
+
+
 
     // ================= FORM LOAD =================
     private async void ProductForm_Load(object sender, EventArgs e)
@@ -29,6 +47,8 @@ public partial class ProductForm : Form
             LoadCombos();
             await LoadSupplierAsync();
             await LoadDataAsync();
+
+         
         }
         catch (Exception ex)
         {

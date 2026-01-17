@@ -14,7 +14,8 @@ public class InvoiceService : IInvoiceService
         _db = db;
     }
 
-    public async Task CreateOrderAsync(
+    // Thay đổi kiểu trả về từ Task thành Task<int>
+    public async Task<int> CreateOrderAsync(
         string customerName,
         string phone,
         string address,
@@ -55,7 +56,7 @@ public class InvoiceService : IInvoiceService
             };
 
             _db.Invoices.Add(invoice);
-            await _db.SaveChangesAsync(ct); // Lưu để lấy InvoiceId
+            await _db.SaveChangesAsync(ct); // Lưu để lấy InvoiceId tự sinh từ DB
 
             decimal total = 0;
 
@@ -84,26 +85,29 @@ public class InvoiceService : IInvoiceService
                 total += item.LineTotal;
                 _db.InvoiceItems.Add(item);
 
-                // Lưu ngay để lấy được InvoiceItemId cho bảng Warranty
+                // Lưu để lấy được InvoiceItemId cho bảng Warranty
                 await _db.SaveChangesAsync(ct);
 
-                // TỰ ĐỘNG TẠO BẢO HÀNH CHO MỖI DÒNG SẢN PHẨM
+                // TỰ ĐỘNG TẠO BẢO HÀNH
                 var warranty = new Warranty
                 {
-                    InvoiceItemId = item.InvoiceItemId, // Lấy ID vừa sinh ra ở trên
+                    InvoiceItemId = item.InvoiceItemId,
                     CustomerName = customerName,
                     CustomerPhone = phone,
                     StartDate = DateTime.Now,
-                    EndDate = DateTime.Now.AddMonths(12) // Mặc định 12 tháng
+                    EndDate = DateTime.Now.AddMonths(12)
                 };
                 _db.Warranties.Add(warranty);
             }
 
-            // Cập nhật tổng tiền hóa đơn
+            // Cập nhật tổng tiền cuối cùng của hóa đơn
             invoice.TotalAmount = total;
 
             await _db.SaveChangesAsync(ct);
             await tran.CommitAsync(ct);
+
+            // ✅ TRẢ VỀ ID CỦA HÓA ĐƠN VỪA TẠO
+            return invoice.InvoiceId;
         }
         catch
         {
