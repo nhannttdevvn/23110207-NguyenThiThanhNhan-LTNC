@@ -31,6 +31,9 @@ namespace PhoneStoreManagement.Winforms
             LoadData();
 
             txtPhone.Leave += txtPhone_Leave;
+            btnAdd.Click += btnAdd_Click;
+            btnRemove.Click += btnRemove_Click;
+            btnCreateOrder.Click += btnCreateOrder_Click;
             cboProduct.SelectedIndexChanged += cboProduct_SelectedIndexChanged;
         }
 
@@ -99,6 +102,7 @@ namespace PhoneStoreManagement.Winforms
 
                 if (!Regex.IsMatch(phone, @"^0\d{9}$"))
                 {
+                    //MessageBox.Show("Số điện thoại không hợp lệ!");
                     return; // Không hiện Messagebox để tránh phiền người dùng khi đang nhập
                 }
 

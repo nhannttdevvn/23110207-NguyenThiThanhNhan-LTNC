@@ -22,7 +22,7 @@ public class InvoiceService : IInvoiceService
         int employeeId,
         List<(int productId, int quantity)> items,
         CancellationToken ct = default)
-    {
+    {   // mở phiên tạm thời, lúc này chưa ghi vào DB : tạo hóa đơn, trừ kho, tạo bảo hành cùng lúc 
         using var tran = await _db.Database.BeginTransactionAsync(ct);
 
         try
